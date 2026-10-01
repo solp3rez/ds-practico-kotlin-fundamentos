@@ -25,83 +25,57 @@ data class EstadoProyecto(
 class GestorTareas {
     // Parte A: Operaciones con Find
 
-    fun encontrarPrimeraTareaUrgente(tareas: List<Tarea>): Tarea? {
-        TODO("Implementar: Debe encontrar la primera tarea con prioridad 3")
-    }
+    fun encontrarPrimeraTareaUrgente(tareas: List<Tarea>): Tarea? = tareas.find { it.prioridad == 3 }
 
     fun buscarPorId(
         tareas: List<Tarea>,
         id: Int,
-    ): Tarea? {
-        TODO("Implementar: Debe encontrar la tarea con el ID especificado")
-    }
+    ): Tarea? = tareas.find { it.id == id }
 
     fun encontrarTareaPendienteConEtiqueta(
         tareas: List<Tarea>,
         etiqueta: String,
-    ): Tarea? {
-        TODO("Implementar: Debe encontrar la primera tarea no completada con la etiqueta especificada")
-    }
+    ): Tarea? = tareas.find { !it.completada && etiqueta in it.etiquetas }
 
     // Parte B: Operaciones con Any
 
-    fun hayTareasUrgentesPendientes(tareas: List<Tarea>): Boolean {
-        TODO("Implementar: Debe verificar si hay alguna tarea urgente (prioridad 3) sin completar")
-    }
+    fun hayTareasUrgentesPendientes(tareas: List<Tarea>): Boolean = tareas.any { it.prioridad == 3 && !it.completada }
 
     fun hayTareasQueSuperanHoras(
         tareas: List<Tarea>,
         horasLimite: Int,
-    ): Boolean {
-        TODO("Implementar: Debe verificar si alguna tarea supera el límite de horas especificado")
-    }
+    ): Boolean = tareas.any { it.tiempoEstimadoHoras > horasLimite }
 
     fun existeTareaConEtiqueta(
         tareas: List<Tarea>,
         etiqueta: String,
-    ): Boolean {
-        TODO("Implementar: Debe verificar si existe alguna tarea con la etiqueta especificada")
-    }
+    ): Boolean = tareas.any { etiqueta in it.etiquetas }
 
     // Parte C: Operaciones con All
 
-    fun todasCompletadas(tareas: List<Tarea>): Boolean {
-        TODO("Implementar: Debe verificar si todas las tareas están completadas")
-    }
+    fun todasCompletadas(tareas: List<Tarea>): Boolean = tareas.all { it.completada }
 
-    fun todasTienenEtiquetas(tareas: List<Tarea>): Boolean {
-        TODO("Implementar: Debe verificar si todas las tareas tienen al menos una etiqueta")
-    }
+    fun todasTienenEtiquetas(tareas: List<Tarea>): Boolean = tareas.all { it.etiquetas.isNotEmpty() }
 
     fun todasDentroDeHoras(
         tareas: List<Tarea>,
         horasMaximo: Int,
-    ): Boolean {
-        TODO("Implementar: Debe verificar si todas las tareas están dentro del límite de horas")
-    }
+    ): Boolean = tareas.all { it.tiempoEstimadoHoras <= horasMaximo }
 
     // Parte D: Combinación de Find, Any y All
 
     fun proyectoListoParaEntrega(tareas: List<Tarea>): Boolean {
-        TODO(
-            """
-            Implementar: Un proyecto está listo si:
-            - Todas las tareas de prioridad alta (3) están completadas
-            - No hay ninguna tarea pendiente con etiqueta "blocker"
-            - Existe al menos una tarea de documentación completada
-        """,
-        )
+        val altasCompletadas = tareas.filter { it.prioridad == 3 }.all { it.completada }
+        val sinBlockersPendientes = tareas.none { !it.completada && "blocker" in it.etiquetas }
+        val hayDocsCompletada = tareas.any { it.completada && "docs" in it.etiquetas }
+        return altasCompletadas && sinBlockersPendientes && hayDocsCompletada
     }
 
-    fun generarResumenEstado(tareas: List<Tarea>): EstadoProyecto {
-        TODO(
-            """
-            Implementar: Debe generar un resumen con:
-            - hayTareasCriticasPendientes: si hay tareas de prioridad 3 sin completar
-            - totalHorasPendientes: suma de horas de tareas no completadas
-            - todosLosBugsResueltos: si todas las tareas con etiqueta "bug" están completadas
-        """,
+    fun generarResumenEstado(tareas: List<Tarea>): EstadoProyecto =
+        EstadoProyecto(
+            hayTareasCriticasPendientes = hayTareasUrgentesPendientes(tareas),
+            totalHorasPendientes = tareas.filter { !it.completada }.sumOf { it.tiempoEstimadoHoras },
+            todosLosBugsResueltos = tareas.filter { "bug" in it.etiquetas }.all { it.completada },
         )
-    }
 }
 
